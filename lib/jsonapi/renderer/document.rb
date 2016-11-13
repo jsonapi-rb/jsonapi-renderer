@@ -1,0 +1,53 @@
+require 'jsonapi/include_directive'
+require 'jsonapi/renderer/resources_processor'
+
+module JSONAPI
+  module Renderer
+    class Document
+      def initialize(params = {})
+        @data    = params.fetch(:data,    :no_data)
+        @errors  = params.fetch(:errors,  [])
+        @meta    = params.fetch(:meta,    nil)
+        @links   = params.fetch(:links,   {})
+        @fields  = params.fetch(:fields,  {})
+        @jsonapi = params.fetch(:jsonapi, nil)
+        @include = JSONAPI::IncludeDirective.new(params.fetch(:include, {}))
+      end
+
+      def to_hash
+        @hash ||= document_hash
+      end
+      alias to_h to_hash
+
+      private
+
+      def document_hash
+        {}.tap do |hash|
+          if @data != :no_data
+            hash.merge!(data_hash)
+          elsif @errors.any?
+            hash.merge!(errors_hash)
+          end
+          hash[:links]   = @links    if @links.any?
+          hash[:meta]    = @meta     unless @meta.nil?
+          hash[:jsonapi] = @jsonapi  unless @jsonapi.nil?
+        end
+      end
+
+      def data_hash
+        primary, included =
+          ResourcesProcessor.new(Array(@data), @include, @fields).process
+        {}.tap do |hash|
+          hash[:data]     = @data.respond_to?(:each) ? primary : primary[0]
+          hash[:included] = included if included.any?
+        end
+      end
+
+      def errors_hash
+        {}.tap do |hash|
+          hash[:errors] = @errors.map(&:as_jsonapi)
+        end
+      end
+    end
+  end
+end

@@ -1,45 +1,21 @@
 require 'set'
 
-require 'jsonapi/include_directive'
-
 module JSONAPI
   module Renderer
-    class SuccessDocument
-      def initialize(resources, options = {})
+    class ResourcesProcessor
+      def initialize(resources, include, fields)
         @resources = resources
-        @meta = options[:meta] || nil
-        @links = options[:links] || {}
-        @fields = options[:fields] || {}
-        # NOTE(beauby): Room for some nifty defaults on those.
-        @jsonapi = options[:jsonapi_object] || nil
-        @include = JSONAPI::IncludeDirective.new(options[:include] || {})
-      end
-
-      def as_json
-        return @json unless @json.nil?
-
-        process_resources
-
-        @json = {}
-        @json[:data] = @resources.respond_to?(:each) ? @primary : @primary[0]
-        @json[:included] = @included if @included.any?
-        @json[:links] = @links if @links.any?
-        @json[:meta] = @meta unless @meta.nil?
-        @json[:jsonapi] = @jsonapi unless @jsonapi.nil?
-
-        @json
-      end
-
-      private
-
-      def process_resources
-        @primary = []
-        @included = []
-        @hashes = {}
+        @include   = include
+        @fields    = fields
+        @primary   = []
+        @included  = []
+        @hashes    = {}
+        @queue     = []
         @processed = Set.new # NOTE(beauby): Set of [type, id, prefix].
-        @queue = []
+      end
 
-        Array(@resources).each do |res|
+      def process
+        @resources.each do |res|
           process_resource(res, '', @include, true)
           @processed.add([res.jsonapi_type, res.jsonapi_id, ''])
         end
@@ -47,13 +23,18 @@ module JSONAPI
           res, prefix, include_dir = @queue.pop
           process_resource(res, prefix, include_dir, false)
         end
+
+        [@primary, @included]
       end
+
+      private
 
       def merge_resources!(a, b)
         b[:relationships].each do |name, rel|
           a[:relationships][name][:data] ||= rel[:data] if rel.key?(:data)
-          (a[:relationships][name][:links] ||= {})
-            .merge!(rel[:links]) if rel.key?(:links)
+          if rel.key?(:links)
+            (a[:relationships][name][:links] ||= {}).merge!(rel[:links])
+          end
         end
       end
 
