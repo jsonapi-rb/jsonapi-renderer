@@ -54,11 +54,12 @@ class ResourceInterface
   #     relationships, or nil.
   # @return [Hash]
   def as_jsonapi(options = {}); end
+end
 ```
 
 #### Rendering a single resource
 ```ruby
-JSONAPI.render(resource,
+JSONAPI.render(data: resource,
                include: include_string,
                fields: fields_hash,
                meta: meta_hash,
@@ -69,7 +70,7 @@ This returns a JSON API compliant hash representing the described document.
 
 #### Rendering a collection of resources
 ```ruby
-JSONAPI.render(resources,
+JSONAPI.render(data: resources,
                include: include_string,
                fields: fields_hash,
                meta: meta_hash,
@@ -81,7 +82,7 @@ This returns a JSON API compliant hash representing the described document.
 ### Rendering errors
 
 ```ruby
-JSONAPI.render_errors(errors,
+JSONAPI.render_errors(errors: errors,
                       meta: meta_hash,
                       links: links_hash)
 ```
