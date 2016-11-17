@@ -52,7 +52,7 @@ module JSONAPI
 
       def process_relationships(res, prefix, include_dir)
         res.jsonapi_related(include_dir.keys).each do |key, data|
-          Array(data).each do |child_res|
+          data.each do |child_res|
             next if child_res.nil?
             child_prefix = "#{prefix}.#{key}"
             next unless @processed.add?([child_res.jsonapi_type,
