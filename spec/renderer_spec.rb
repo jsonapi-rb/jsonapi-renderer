@@ -1,22 +1,13 @@
-require 'jsonapi/renderer'
-
-class Model
-  def initialize(params)
-    params.each { |k, v| instance_variable_set("@#{k}", v) }
-  end
-end
-
-class User < Model
-  attr_accessor :id, :name, :address, :posts
-end
-
-class Post < Model
-  attr_accessor :id, :title, :date, :author
-end
+require 'spec_helper'
 
 class UserResource
-  def initialize(user)
-    @user = user
+  attr_accessor :id, :name, :address, :posts
+
+  def initialize(id, name, address, posts)
+    @id = id
+    @name = name
+    @address = address
+    @posts = posts
   end
 
   def jsonapi_type
@@ -24,12 +15,12 @@ class UserResource
   end
 
   def jsonapi_id
-    @user.id.to_s
+    @id.to_s
   end
 
   def jsonapi_related(included)
     if included.include?(:posts)
-      { posts: @user.posts.map { |p| PostResource.new(p) } }
+      { posts: @posts.map { |p| p } }
     else
       {}
     end
@@ -40,15 +31,15 @@ class UserResource
     included = options[:include] || []
 
     hash = { id: jsonapi_id, type: jsonapi_type }
-    hash[:attributes] = { name: @user.name, address: @user.address }
+    hash[:attributes] = { name: @name, address: @address }
                         .select { |k, _| fields.include?(k) }
     if fields.include?(:posts)
       hash[:relationships] = { posts: {} }
       hash[:relationships][:posts] = {
         links: {
-          self: "http://api.example.com/users/#{@user.id}/relationships/posts",
+          self: "http://api.example.com/users/#{@id}/relationships/posts",
           related: {
-            href: "http://api.example.com/users/#{@user.id}/posts",
+            href: "http://api.example.com/users/#{@id}/posts",
             meta: {
               do_not_use: true
             }
@@ -59,14 +50,14 @@ class UserResource
         }
       }
       if included.include?(:posts)
-        hash[:relationships][:posts][:data] = @user.posts.map do |p|
+        hash[:relationships][:posts][:data] = @posts.map do |p|
           { type: 'posts', id: p.id.to_s }
         end
       end
     end
 
     hash[:links] = {
-      self: "http://api.example.com/users/#{@user.id}"
+      self: "http://api.example.com/users/#{@id}"
     }
     hash[:meta] = { user_meta: 'is_meta' }
 
@@ -75,8 +66,13 @@ class UserResource
 end
 
 class PostResource
-  def initialize(post)
-    @post = post
+  attr_accessor :id, :title, :date, :author
+
+  def initialize(id, title, date, author)
+    @id = id
+    @title = title
+    @date = date
+    @author = author
   end
 
   def jsonapi_type
@@ -84,11 +80,11 @@ class PostResource
   end
 
   def jsonapi_id
-    @post.id.to_s
+    @id.to_s
   end
 
   def jsonapi_related(included)
-    included.include?(:author) ? { author: UserResource.new(@post.author) } : {}
+    included.include?(:author) ? { author: @author } : {}
   end
 
   def as_jsonapi(options = {})
@@ -96,14 +92,14 @@ class PostResource
     included = options[:include] || []
     hash = { id: jsonapi_id, type: jsonapi_type }
 
-    hash[:attributes] = { title: @post.title, date: @post.date }
+    hash[:attributes] = { title: @title, date: @date }
                         .select { |k, _| fields.include?(k) }
     if fields.include?(:author)
       hash[:relationships] = { author: {} }
       hash[:relationships][:author] = {
         links: {
-          self: "http://api.example.com/posts/#{@post.id}/relationships/author",
-          related: "http://api.example.com/posts/#{@post.id}/author"
+          self: "http://api.example.com/posts/#{@id}/relationships/author",
+          related: "http://api.example.com/posts/#{@id}/author"
         },
         meta: {
           author_active: true
@@ -111,10 +107,10 @@ class PostResource
       }
       if included.include?(:author)
         hash[:relationships][:author][:data] =
-          if @post.author.nil?
+          if @author.nil?
             nil
           else
-            { type: 'users', id: @post.author.id.to_s }
+            { type: 'users', id: @author.id.to_s }
           end
       end
     end
@@ -126,15 +122,15 @@ end
 describe JSONAPI, '#render' do
   before(:all) do
     @users = [
-      User.new(id: 1, name: 'User 1', address: '123 Example st.', posts: []),
-      User.new(id: 2, name: 'User 2', address: '234 Example st.', posts: []),
-      User.new(id: 3, name: 'User 3', address: '345 Example st.', posts: []),
-      User.new(id: 4, name: 'User 4', address: '456 Example st.', posts: [])
+      UserResource.new(1, 'User 1', '123 Example st.', []),
+      UserResource.new(2, 'User 2', '234 Example st.', []),
+      UserResource.new(3, 'User 3', '345 Example st.', []),
+      UserResource.new(4, 'User 4', '456 Example st.', [])
     ]
     @posts = [
-      Post.new(id: 1, title: 'Post 1', date: 'yesterday', author: @users[1]),
-      Post.new(id: 2, title: 'Post 2', date: 'today', author: @users[0]),
-      Post.new(id: 3, title: 'Post 3', date: 'tomorrow', author: @users[1])
+      PostResource.new(1, 'Post 1', 'yesterday', @users[1]),
+      PostResource.new(2, 'Post 2', 'today', @users[0]),
+      PostResource.new(3, 'Post 3', 'tomorrow', @users[1])
     ]
     @users[0].posts = [@posts[1]]
     @users[1].posts = [@posts[0], @posts[2]]
@@ -159,7 +155,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders a single resource' do
-    actual = JSONAPI.render(data: UserResource.new(@users[0]))
+    actual = JSONAPI.render(data: @users[0])
     expected = {
       data: {
         type: 'users',
@@ -197,8 +193,8 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders a collection of resources' do
-    actual = JSONAPI.render(data: [UserResource.new(@users[0]),
-                                   UserResource.new(@users[1])])
+    actual = JSONAPI.render(data: [@users[0],
+                                   @users[1]])
     expected = {
       data: [
         {
@@ -268,7 +264,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders included relationships' do
-    actual = JSONAPI.render(data: UserResource.new(@users[0]),
+    actual = JSONAPI.render(data: @users[0],
                             include: 'posts')
     expected = {
       data: {
@@ -329,7 +325,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'filters out fields' do
-    actual = JSONAPI.render(data: UserResource.new(@users[0]),
+    actual = JSONAPI.render(data: @users[0],
                             fields: { users: [:name] })
     expected = {
       data: {
