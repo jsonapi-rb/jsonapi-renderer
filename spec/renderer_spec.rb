@@ -1,4 +1,4 @@
-require 'jsonapi/renderer'
+require 'spec_helper'
 
 class Model
   def initialize(params)

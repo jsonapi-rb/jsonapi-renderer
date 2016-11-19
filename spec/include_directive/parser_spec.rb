@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 require 'jsonapi/include_directive'
 
 describe JSONAPI::IncludeDirective::Parser, '.parse_include_args' do
