@@ -42,11 +42,11 @@ class ResourceInterface
   # @return [String]
   def jsonapi_id; end
 
-  # Returns a hash containing, for each included relationship, the resource(s)
-  # to be included from that one.
+  # Returns a hash containing, for each included relationship, an array of the 
+  # resources to be included from that one.
   # @param [Array<Symbol>] included_relationships The keys of the relationships
   #   to be included.
-  # @return [Hash{Symbol => #ResourceInterface, Array<#ResourceInterface>}]
+  # @return [Hash{Symbol => Array<#ResourceInterface>}]
   def jsonapi_related(included_relationships); end
 
   # Returns a JSON API-compliant representation of the resource as a hash.
