@@ -84,7 +84,7 @@ class PostResource
   end
 
   def jsonapi_related(included)
-    included.include?(:author) ? { author: @author } : {}
+    included.include?(:author) ? { author: [@author] } : {}
   end
 
   def as_jsonapi(options = {})
@@ -388,6 +388,29 @@ describe JSONAPI, '#render' do
   it 'renders an empty hash if neither errors nor data provided' do
     actual = JSONAPI.render({})
     expected = {}
+
+    expect(actual).to eq(expected)
+  end
+
+  class ErrorResource
+    def initialize(id, title)
+      @id = id
+      @title = title
+    end
+
+    def as_jsonapi
+      { id: @id, title: @title }
+    end
+  end
+
+  it 'renders errors' do
+    errors = [ErrorResource.new('1', 'Not working'),
+              ErrorResource.new('2', 'Works poorly')]
+    actual = JSONAPI.render(errors: errors)
+    expected = {
+      errors: [{ id: '1', title: 'Not working' },
+               { id: '2', title: 'Works poorly' }]
+    }
 
     expect(actual).to eq(expected)
   end

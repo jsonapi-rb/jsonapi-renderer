@@ -71,4 +71,12 @@ describe JSONAPI::IncludeDirective::Parser, '.parse_include_args' do
 
     expect(hash).to eq expected
   end
+
+  it 'handles invalid input' do
+    args = Object.new
+    hash = JSONAPI::IncludeDirective::Parser.parse_include_args(args)
+    expected = {}
+
+    expect(hash).to eq expected
+  end
 end
