@@ -9,7 +9,7 @@ module JSONAPI
         @errors  = params.fetch(:errors,  [])
         @meta    = params.fetch(:meta,    nil)
         @links   = params.fetch(:links,   {})
-        @fields  = params.fetch(:fields,  {})
+        @fields  = _symbolize_fields(params.fetch(:fields, {}))
         @jsonapi = params.fetch(:jsonapi, nil)
         @include = JSONAPI::IncludeDirective.new(params.fetch(:include, {}))
       end
@@ -46,6 +46,12 @@ module JSONAPI
       def errors_hash
         {}.tap do |hash|
           hash[:errors] = @errors.map(&:as_jsonapi)
+        end
+      end
+
+      def _symbolize_fields(fields)
+        fields.each_with_object({}) do |(k, v), h|
+          h[k.to_sym] = v.map(&:to_sym)
         end
       end
     end
