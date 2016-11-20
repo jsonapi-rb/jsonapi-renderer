@@ -7,58 +7,78 @@ module JSONAPI
         @resources = resources
         @include   = include
         @fields    = fields
-        @primary   = []
-        @included  = []
-        @hashes    = {}
-        @queue     = []
-        @processed = Set.new # NOTE(beauby): Set of [type, id, prefix].
       end
 
       def process
-        @resources.each do |res|
-          process_resource(res, '', @include, true)
-          @processed.add([res.jsonapi_type, res.jsonapi_id, ''])
-        end
-        until @queue.empty?
-          res, prefix, include_dir = @queue.pop
-          process_resource(res, prefix, include_dir, false)
-        end
+        traverse_resources
+        process_resources
 
         [@primary, @included]
       end
 
       private
 
-      def merge_resources!(a, b)
-        b[:relationships].each do |name, rel|
-          a[:relationships][name][:data] ||= rel[:data] if rel.key?(:data)
-          if rel.key?(:links)
-            (a[:relationships][name][:links] ||= {}).merge!(rel[:links])
-          end
+      def traverse_resources
+        @traversed    = Set.new # [type, id, prefix]
+        @include_rels = {} # [type, id => Set]
+        @queue        = []
+        @primary      = []
+        @included     = []
+
+        initialize_queue
+        traverse_queue
+      end
+
+      def initialize_queue
+        @resources.each do |res|
+          @traversed.add([res.jsonapi_type, res.jsonapi_id, ''])
+          traverse_resource(res, @include.keys, true)
+          enqueue_related_resources(res, '', @include)
         end
       end
 
-      def process_resource(res, prefix, include_dir, is_primary)
+      def traverse_queue
+        until @queue.empty?
+          res, prefix, include_dir = @queue.pop
+          traverse_resource(res, include_dir.keys, false)
+          enqueue_related_resources(res, prefix, include_dir)
+        end
+      end
+
+      def traverse_resource(res, include_keys, primary)
         ri = [res.jsonapi_type, res.jsonapi_id]
-        hash = res.as_jsonapi(fields: @fields[res.jsonapi_type.to_sym],
-                              include: include_dir.keys)
-        if @hashes.key?(ri)
-          merge_resources!(@hashes[ri], hash)
+        if @include_rels.include?(ri)
+          @include_rels[ri].merge!(include_keys)
         else
-          (is_primary ? @primary : @included) << (@hashes[ri] = hash)
+          @include_rels[ri] = Set.new(include_keys)
+          (primary ? @primary : @included) << res
         end
-        process_relationships(res, prefix, include_dir)
       end
 
-      def process_relationships(res, prefix, include_dir)
+      def enqueue_related_resources(res, prefix, include_dir)
         res.jsonapi_related(include_dir.keys).each do |key, data|
           data.each do |child_res|
             next if child_res.nil?
             child_prefix = "#{prefix}.#{key}"
-            next unless @processed.add?([child_res.jsonapi_type,
-                                         child_res.jsonapi_id,
-                                         child_prefix])
-            @queue << [child_res, child_prefix, include_dir[key]]
+            enqueue_resource(child_res, child_prefix, include_dir[key])
+          end
+        end
+      end
+
+      def enqueue_resource(res, prefix, include_dir)
+        return unless @traversed.add?([res.jsonapi_type,
+                                       res.jsonapi_id,
+                                       prefix])
+        @queue << [res, prefix, include_dir]
+      end
+
+      def process_resources
+        [@primary, @included].each do |resources|
+          resources.map! do |res|
+            ri = [res.jsonapi_type, res.jsonapi_id]
+            include_dir = @include_rels[ri]
+            fields = @fields[res.jsonapi_type.to_sym]
+            res.as_jsonapi(include: include_dir, fields: fields)
           end
         end
       end
