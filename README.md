@@ -52,8 +52,8 @@ class ResourceInterface
   # Returns a JSON API-compliant representation of the resource as a hash.
   # @param [Hash] options
   #   @option [Array<Symbol>, Nil] fields The requested fields, or nil.
-  #   @option [Array<Symbol>, Nil] included The requested included
-  #     relationships, or nil.
+  #   @option [Array<Symbol>] include The requested relationships to 
+  #     include (defaults to []).
   # @return [Hash]
   def as_jsonapi(options = {}); end
 end
