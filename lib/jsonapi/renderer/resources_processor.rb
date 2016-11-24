@@ -39,7 +39,7 @@ module JSONAPI
 
       def traverse_queue
         until @queue.empty?
-          res, prefix, include_dir = @queue.pop
+          res, prefix, include_dir = @queue.shift
           traverse_resource(res, include_dir.keys, false)
           enqueue_related_resources(res, prefix, include_dir)
         end
