@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.email         = 'lucas.hosseini@gmail.com'
   spec.summary       = 'Render JSONAPI documents.'
   spec.description   = 'Efficiently render JSON API documents.'
-  spec.homepage      = 'https://github.com/jsonapi-rb/renderer'
+  spec.homepage      = 'https://github.com/jsonapi-rb/jsonapi-renderer'
   spec.license       = 'MIT'
 
   spec.files         = Dir['README.md', 'lib/**/*']
