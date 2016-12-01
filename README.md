@@ -4,8 +4,8 @@ Ruby gem for rendering [JSON API](http://jsonapi.org) documents.
 ## Status
 
 [![Gem Version](https://badge.fury.io/rb/jsonapi-renderer.svg)](https://badge.fury.io/rb/jsonapi-renderer)
-[![Build Status](https://secure.travis-ci.org/jsonapi-rb/renderer.svg?branch=master)](http://travis-ci.org/jsonapi-rb/renderer?branch=master)
-[![codecov](https://codecov.io/gh/jsonapi-rb/renderer/branch/master/graph/badge.svg)](https://codecov.io/gh/jsonapi-rb/renderer)
+[![Build Status](https://secure.travis-ci.org/jsonapi-rb/jsonapi-renderer.svg?branch=master)](http://travis-ci.org/jsonapi-rb/renderer?branch=master)
+[![codecov](https://codecov.io/gh/jsonapi-rb/jsonapi-renderer/branch/master/graph/badge.svg)](https://codecov.io/gh/jsonapi-rb/renderer)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/jsonapi-rb/Lobby)
 
 ## Installation
