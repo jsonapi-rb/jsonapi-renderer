@@ -48,7 +48,7 @@ module JSONAPI
       def traverse_resource(res, include_keys, primary)
         ri = [res.jsonapi_type, res.jsonapi_id]
         if @include_rels.include?(ri)
-          @include_rels[ri].merge!(include_keys)
+          @include_rels[ri].merge(include_keys)
         else
           @include_rels[ri] = Set.new(include_keys)
           (primary ? @primary : @included) << res
