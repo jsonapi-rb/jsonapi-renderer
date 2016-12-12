@@ -38,7 +38,7 @@ module JSONAPI
         primary, included =
           ResourcesProcessor.new(Array(@data), @include, @fields).process
         {}.tap do |hash|
-          hash[:data]     = @data.respond_to?(:each) ? primary : primary[0]
+          hash[:data]     = @data.respond_to?(:to_ary) ? primary : primary[0]
           hash[:included] = included if included.any?
         end
       end
