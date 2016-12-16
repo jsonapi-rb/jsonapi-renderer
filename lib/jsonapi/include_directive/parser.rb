@@ -104,27 +104,23 @@ module JSONAPI
             next
           end
 
-          # delimit path element
-          if inc[pos] == '.' || inc[pos] == ',' || inc[pos] == ')'
-            if path_elem != ''
-              if cur_paths.empty?
-                cur_paths = [path_elem]
-              else
-                cur_paths.map! { |p| "#{p}.#{path_elem}" }
-              end
-              path_elem = ''
+          delim_off = inc[pos..-1].index(/[\.,\)]/)
+          path_elem = inc[pos, delim_off]
+          if path_elem != ''
+            if cur_paths.empty?
+              cur_paths = [path_elem]
+            else
+              cur_paths.map! { |p| "#{p}.#{path_elem}" }
             end
-          else
-            path_elem += inc[pos]
           end
 
+          pos += delim_off
           if inc[pos] == ',' || inc[pos] == ')'
             paths.concat(cur_paths)
             cur_paths = []
           end
 
           return [pos + 1, paths] if inc[pos] == ')'
-
           pos += 1
         end
 
