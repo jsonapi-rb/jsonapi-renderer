@@ -74,6 +74,7 @@ module JSONAPI
       end
     end
 
+    # Utility class for handling path expansions in include strings.
     class PathExpander
       def initialize(str)
         @str = expand(str).join(',')
@@ -88,44 +89,50 @@ module JSONAPI
       private
 
       # @api private
+      def next_token(inc, pos)
+        delim_off = inc[pos..-1].index(/[\.,\(\)]/)
+        path_elem = inc[pos, delim_off]
+
+        [pos + delim_off, path_elem]
+      end
+
+      # @api private
+      def combine(p1, p2)
+        if p1.empty?
+          p2
+        else
+          p1.product(p2).map! { |p, q| "#{p}.#{q}" }
+        end
+      end
+
+      # @api private
+      # rubocop:disable Metrics/PerceivedComplexity, Metrics/AbcSize
+      # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity
       def _expand(inc, pos)
         path_elem = ''
         paths = []
         cur_paths = []
         while pos < inc.length
-          if inc[pos] == '('
-            end_pos, sub_paths = _expand(inc, pos + 1)
-            pos = end_pos
-            if cur_paths.empty?
-              cur_paths = sub_paths
-            else
-              cur_paths = cur_paths.product(sub_paths).map { |p, q| "#{p}.#{q}" }
-            end
-            next
-          end
+          pos, path_elem = next_token(inc, pos)
+          cur_paths = combine(cur_paths, [path_elem]) unless path_elem == ''
 
-          delim_off = inc[pos..-1].index(/[\.,\)]/)
-          path_elem = inc[pos, delim_off]
-          if path_elem != ''
-            if cur_paths.empty?
-              cur_paths = [path_elem]
-            else
-              cur_paths.map! { |p| "#{p}.#{path_elem}" }
-            end
-          end
-
-          pos += delim_off
-          if inc[pos] == ',' || inc[pos] == ')'
+          delim = inc[pos]
+          if delim == '('
+            pos, sub_paths = _expand(inc, pos + 1)
+            cur_paths = combine(cur_paths, sub_paths)
+          elsif delim == ',' || delim == ')'
             paths.concat(cur_paths)
             cur_paths = []
+            return [pos, paths] if delim == ')'
           end
 
-          return [pos + 1, paths] if inc[pos] == ')'
           pos += 1
         end
 
         [inc.length, []]
       end
+      # rubocop:enable Metrics/PerceivedComplexity, Metrics/AbcSize
+      # rubocop:enable Metrics/MethodLength, Metrics/CyclomaticComplexity
 
       # @api private
       def expand(inc)

@@ -79,4 +79,42 @@ describe JSONAPI::IncludeDirective::Parser, '.parse_include_args' do
 
     expect(hash).to eq expected
   end
+
+  it 'handles path expansions' do
+    args = 'foo.bar.(foo.bar,bar.(bar,baz).foobar).foo,bar'
+    hash = JSONAPI::IncludeDirective::Parser.new(args).to_hash
+    expected = {
+      foo: {
+        bar: {
+          foo: {
+            bar: {
+              foo: {}
+            }
+          },
+          bar: {
+            bar: {
+              foobar: {
+                foo: {}
+              }
+            },
+            baz: {
+              foobar: {
+                foo: {}
+              }
+            }
+          }
+        }
+      },
+      bar: {}
+    }
+
+    expect(hash).to eq expected
+  end
+  it 'handles invalid path expansions' do
+    args = 'foo...((('
+    hash = JSONAPI::IncludeDirective::Parser.new(args).to_hash
+    expected = {}
+
+    expect(hash).to eq expected
+  end
 end
