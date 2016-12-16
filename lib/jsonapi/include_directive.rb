@@ -14,7 +14,7 @@ module JSONAPI
   class IncludeDirective
     # @param include_args (see Parser.parse_include_args)
     def initialize(include_args, options = {})
-      include_hash = Parser.parse_include_args(include_args)
+      include_hash = Parser.new(include_args).to_hash
       @hash = include_hash.each_with_object({}) do |(key, value), hash|
         hash[key] = self.class.new(value, options)
       end
