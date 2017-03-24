@@ -2,6 +2,16 @@ require 'spec_helper'
 
 require 'jsonapi/include_directive'
 
+describe JSONAPI::IncludeDirective, '.initialize' do
+  it 'raises InvalidKey exception when keys are invalid' do
+    valid_keys   = 'friends,post.comments'
+    invalid_keys = ' leading.space,trailing.space ,middle. space'
+
+    expect { JSONAPI::IncludeDirective.new("#{valid_keys},#{invalid_keys}") }.
+      to raise_error(JSONAPI::IncludeDirective::InvalidKey, invalid_keys)
+  end
+end
+
 describe JSONAPI::IncludeDirective, '.key?' do
   it 'handles existing keys' do
     str = 'posts.comments'
