@@ -3,12 +3,12 @@ require 'spec_helper'
 require 'jsonapi/include_directive'
 
 describe JSONAPI::IncludeDirective, '.initialize' do
-  it 'raises InvalidKey exception when keys are invalid in a fail-fast fashion' do
+  it 'raises InvalidKey when encounters invalid one' do
     valid_keys   = 'friends,post.comments'
     invalid_keys = ' leading.space,trailing.space '
 
     expect { JSONAPI::IncludeDirective.new("#{valid_keys},#{invalid_keys}") }
-      .to raise_error(JSONAPI::IncludeDirective::InvalidKey, " leading")
+      .to raise_error(JSONAPI::IncludeDirective::InvalidKey, ' leading')
   end
 end
 

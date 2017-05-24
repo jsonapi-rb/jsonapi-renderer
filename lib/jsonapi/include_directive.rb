@@ -76,9 +76,9 @@ module JSONAPI
     private
 
     def validate(key)
-      unless valid?(key)
-        raise InvalidKey.new(key)
-      end
+      return if valid?(key)
+
+      raise InvalidKey, key
     end
 
     def valid?(key)
