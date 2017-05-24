@@ -17,7 +17,8 @@ module JSONAPI
       include_hash = Parser.parse_include_args(include_args)
 
       @hash = include_hash.each_with_object({}) do |(key, value), hash|
-        validate(key)
+        raise InvalidKey, key unless valid?(key)
+
         hash[key] = self.class.new(value, outer: false, **options)
       end
       @options = options
@@ -74,12 +75,6 @@ module JSONAPI
     class InvalidKey < StandardError; end
 
     private
-
-    def validate(key)
-      return if valid?(key)
-
-      raise InvalidKey, key
-    end
 
     def valid?(key)
       key.match(valid_json_key_name_regex)
