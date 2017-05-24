@@ -88,7 +88,7 @@ module JSONAPI
     def valid_json_key_name_regex
       # not start with hyphen/underscore/space
       # not end with hyphen/underscore/space
-      # contains a-zA-Z, *  and hyphen/underscore/space in member names
+      # contains a-zA-Z, 0-9, and hyphen/underscore/space in member names
       /^(?![\s\-_])[\w\s\-\*]+(?<![\s\-_])$/
     end
   end
