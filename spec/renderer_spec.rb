@@ -346,6 +346,47 @@ describe JSONAPI::Renderer, '#render' do
     expect(actual).to eq(expected)
   end
 
+  context 'when fields option is nil' do
+    it 'does not filter out fields' do
+      actual = subject.render(data: @users[0], fields: nil)
+
+      expected = {
+        data: {
+          type: 'users',
+          id: '1',
+          attributes: {
+            name: 'User 1',
+            address: '123 Example st.'
+          },
+          relationships: {
+            posts: {
+              links: {
+                self: 'http://api.example.com/users/1/relationships/posts',
+                related: {
+                  href: 'http://api.example.com/users/1/posts',
+                  meta: {
+                    do_not_use: true
+                  }
+                }
+              },
+              meta: {
+                deleted_posts: 5
+              }
+            }
+          },
+          links: {
+            self: 'http://api.example.com/users/1'
+          },
+          meta: {
+            user_meta: 'is_meta'
+          }
+        }
+      }
+
+      expect(actual).to eq(expected)
+    end
+  end
+
   it 'renders a toplevel meta' do
     actual = subject.render(data: nil,
                             meta: { this: 'is_meta' })

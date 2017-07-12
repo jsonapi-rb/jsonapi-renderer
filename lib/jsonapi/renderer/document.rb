@@ -7,11 +7,11 @@ module JSONAPI
       def initialize(params = {})
         @data    = params.fetch(:data,    :no_data)
         @errors  = params.fetch(:errors,  [])
-        @meta    = params.fetch(:meta,    nil)
-        @links   = params.fetch(:links,   {})
-        @fields  = _symbolize_fields(params.fetch(:fields, {}))
-        @jsonapi = params.fetch(:jsonapi, nil)
-        @include = JSONAPI::IncludeDirective.new(params.fetch(:include, {}))
+        @meta    = params[:meta]
+        @links   = params[:links] || {}
+        @fields  = _symbolize_fields(params[:fields] || {})
+        @jsonapi = params[:jsonapi]
+        @include = JSONAPI::IncludeDirective.new(params[:include] || {})
       end
 
       def to_hash
