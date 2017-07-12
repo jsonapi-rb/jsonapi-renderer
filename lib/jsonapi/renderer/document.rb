@@ -2,7 +2,7 @@ require 'jsonapi/include_directive'
 require 'jsonapi/renderer/resources_processor'
 
 module JSONAPI
-  module Renderer
+  class Renderer
     class Document
       def initialize(params = {})
         @data    = params.fetch(:data,    :no_data)
