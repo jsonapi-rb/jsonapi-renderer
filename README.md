@@ -50,15 +50,15 @@ class ResourceInterface
 
   # Returns a hash containing, for each included relationship, an array of the 
   # resources to be included from that one.
-  # @param [Array<Symbol>] included_relationships The keys of the relationships
+  # @param included_relationships [Array<Symbol>] The keys of the relationships
   #   to be included.
   # @return [Hash{Symbol => Array<#ResourceInterface>}]
   def jsonapi_related(included_relationships); end
 
   # Returns a JSON API-compliant representation of the resource as a hash.
-  # @param [Hash] options
-  #   @option [Array<Symbol>, Nil] fields The requested fields, or nil.
-  #   @option [Array<Symbol>] include The requested relationships to 
+  # @param options [Hash]
+  #   @option fields [Array<Symbol>, Nil] The requested fields, or nil.
+  #   @option include [Array<Symbol>] The requested relationships to 
   #     include (defaults to []).
   # @return [Hash]
   def as_jsonapi(options = {}); end
