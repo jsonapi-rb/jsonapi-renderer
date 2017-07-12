@@ -1,7 +1,7 @@
 require 'set'
 
 module JSONAPI
-  module Renderer
+  class Renderer
     class ResourcesProcessor
       def initialize(resources, include, fields)
         @resources = resources
