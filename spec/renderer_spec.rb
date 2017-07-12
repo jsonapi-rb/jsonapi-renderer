@@ -119,7 +119,7 @@ class PostResource
   end
 end
 
-describe JSONAPI, '#render' do
+describe JSONAPI::Renderer, '#render' do
   before(:all) do
     @users = [
       UserResource.new(1, 'User 1', '123 Example st.', []),
@@ -137,7 +137,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders nil' do
-    actual = JSONAPI.render(data: nil)
+    actual = subject.render(data: nil)
     expected = {
       data: nil
     }
@@ -146,7 +146,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders an empty array' do
-    actual = JSONAPI.render(data: [])
+    actual = subject.render(data: [])
     expected = {
       data: []
     }
@@ -155,7 +155,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders a single resource' do
-    actual = JSONAPI.render(data: @users[0])
+    actual = subject.render(data: @users[0])
     expected = {
       data: {
         type: 'users',
@@ -193,7 +193,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders a collection of resources' do
-    actual = JSONAPI.render(data: [@users[0],
+    actual = subject.render(data: [@users[0],
                                    @users[1]])
     expected = {
       data: [
@@ -264,7 +264,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders included relationships' do
-    actual = JSONAPI.render(data: @users[0],
+    actual = subject.render(data: @users[0],
                             include: 'posts')
     expected = {
       data: {
@@ -325,7 +325,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'filters out fields' do
-    actual = JSONAPI.render(data: @users[0],
+    actual = subject.render(data: @users[0],
                             fields: { users: [:name] })
     expected = {
       data: {
@@ -347,7 +347,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders a toplevel meta' do
-    actual = JSONAPI.render(data: nil,
+    actual = subject.render(data: nil,
                             meta: { this: 'is_meta' })
     expected = {
       data: nil,
@@ -358,7 +358,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders toplevel links' do
-    actual = JSONAPI.render(data: nil,
+    actual = subject.render(data: nil,
                             links: { self: 'http://api.example.com/users' })
     expected = {
       data: nil,
@@ -369,7 +369,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders a toplevel jsonapi object' do
-    actual = JSONAPI.render(data: nil,
+    actual = subject.render(data: nil,
                             jsonapi: {
                               version: '1.0',
                               meta: 'For real'
@@ -386,7 +386,7 @@ describe JSONAPI, '#render' do
   end
 
   it 'renders an empty hash if neither errors nor data provided' do
-    actual = JSONAPI.render({})
+    actual = subject.render({})
     expected = {}
 
     expect(actual).to eq(expected)
@@ -406,7 +406,7 @@ describe JSONAPI, '#render' do
   it 'renders errors' do
     errors = [ErrorResource.new('1', 'Not working'),
               ErrorResource.new('2', 'Works poorly')]
-    actual = JSONAPI.render(errors: errors)
+    actual = subject.render(errors: errors)
     expected = {
       errors: [{ id: '1', title: 'Not working' },
                { id: '2', title: 'Works poorly' }]
