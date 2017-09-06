@@ -45,7 +45,7 @@ module JSONAPI
 
       def errors_hash
         {}.tap do |hash|
-          hash[:errors] = @errors.map(&:as_jsonapi)
+          hash[:errors] = @errors.flat_map(&:as_jsonapi)
         end
       end
 
