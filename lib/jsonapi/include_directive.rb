@@ -51,7 +51,7 @@ module JSONAPI
       new(Parser.parse_hash(hash), options)
     end
 
-    # @param include_hash [Hash{Symbol=>Hash}]
+    # @api private
     def initialize(include_hash, options = {})
       @hash = include_hash.each_with_object({}) do |(key, value), hash|
         hash[key] = self.class.new(value, options)
