@@ -10,8 +10,8 @@ module JSONAPI
     #           #as_jsonapi)>,
     #           nil] Primary resource(s) to be rendered.
     #   @option errors [Array<#jsonapi_id>] Errors to be rendered.
-    #   @option include Relationships to be included. See
-    #     JSONAPI::IncludeDirective.
+    #   @option include [JSONAPI::IncludeDirective] Relationships to be
+    #     included.
     #   @option fields [Hash{Symbol, Array<Symbol>}, Hash{String, Array<String>}]
     #     List of requested fields for some or all of the resource types.
     #   @option meta [Hash] Non-standard top-level meta information to be
