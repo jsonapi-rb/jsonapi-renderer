@@ -2,14 +2,13 @@ require 'set'
 
 module JSONAPI
   class Renderer
+    # @api private
     class ResourcesProcessor
-      def initialize(resources, include, fields)
+      def process(resources, include, fields)
         @resources = resources
         @include   = include
         @fields    = fields
-      end
 
-      def process
         traverse_resources
         process_resources
 
@@ -73,14 +72,7 @@ module JSONAPI
       end
 
       def process_resources
-        [@primary, @included].each do |resources|
-          resources.map! do |res|
-            ri = [res.jsonapi_type, res.jsonapi_id]
-            include_dir = @include_rels[ri]
-            fields = @fields[res.jsonapi_type.to_sym]
-            res.as_jsonapi(include: include_dir, fields: fields)
-          end
-        end
+        raise 'Not implemented'
       end
     end
   end
