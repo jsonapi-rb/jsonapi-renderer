@@ -48,7 +48,7 @@ class ResourceInterface
   # @return [String]
   def jsonapi_id; end
 
-  # Returns a hash containing, for each included relationship, an array of the 
+  # Returns a hash containing, for each included relationship, an array of the
   # resources to be included from that one.
   # @param included_relationships [Array<Symbol>] The keys of the relationships
   #   to be included.
@@ -57,8 +57,8 @@ class ResourceInterface
 
   # Returns a JSON API-compliant representation of the resource as a hash.
   # @param options [Hash]
-  #   @option fields [Array<Symbol>, Nil] The requested fields, or nil.
-  #   @option include [Array<Symbol>] The requested relationships to 
+  #   @option fields [Set<Symbol>, Nil] The requested fields, or nil.
+  #   @option include [Set<Symbol>] The requested relationships to
   #     include (defaults to []).
   # @return [Hash]
   def as_jsonapi(options = {}); end
@@ -99,6 +99,32 @@ where `errors` is an array of objects implementing the `as_jsonapi` method, that
 returns a JSON API-compliant representation of the error.
 
 This returns a JSON API compliant hash representing the described document.
+
+### Caching
+
+The generated JSON fragments can be cached in any cache implementation
+supporting the `fetch_multi` method.
+
+When using caching, the serializable resources must implement an
+additional `jsonapi_cache_key` method:
+```ruby
+  # Returns a cache key for the resource, parametered by the `include` and
+  #   `fields` options.
+  # @param options [Hash]
+  #   @option fields [Set<Symbol>, Nil] The requested fields, or nil.
+  #   @option include [Set<Symbol>] The requested relationships to
+  #     include (defaults to []).
+  # @return [String]
+  def jsonapi_cache_key(options = {}); end
+```
+
+The cache instance must be passed to the renderer as follows:
+```ruby
+JSONAPI.render(data: resources,
+               include: include_string,
+               fields: fields_hash,
+               cache: cache_instance)
+```
 
 ## License
 

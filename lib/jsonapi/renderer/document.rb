@@ -1,5 +1,6 @@
 require 'jsonapi/include_directive'
-require 'jsonapi/renderer/resources_processor'
+require 'jsonapi/renderer/simple_resources_processor'
+require 'jsonapi/renderer/cached_resources_processor'
 
 module JSONAPI
   class Renderer
@@ -12,6 +13,7 @@ module JSONAPI
         @fields  = _symbolize_fields(params[:fields] || {})
         @jsonapi = params[:jsonapi]
         @include = JSONAPI::IncludeDirective.new(params[:include] || {})
+        @cache   = params[:cache]
       end
 
       def to_hash
@@ -36,10 +38,18 @@ module JSONAPI
 
       def data_hash
         primary, included =
-          ResourcesProcessor.new(Array(@data), @include, @fields).process
+          resources_processor.process(Array(@data), @include, @fields)
         {}.tap do |hash|
           hash[:data]     = @data.respond_to?(:to_ary) ? primary : primary[0]
           hash[:included] = included if included.any?
+        end
+      end
+
+      def resources_processor
+        if @cache
+          CachedResourcesProcessor.new(@cache)
+        else
+          SimpleResourcesProcessor.new
         end
       end
 
