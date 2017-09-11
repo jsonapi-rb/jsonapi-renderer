@@ -34,11 +34,11 @@ describe JSONAPI::Renderer, '#render' do
     cache = Cache.new
     # Warm up the cache.
     subject.render(data: @users[0],
-                   include: 'posts',
+                   include: JSONAPI::IncludeDirective.from_string('posts'),
                    cache: cache)
     # Actual call on warm cache.
     actual = subject.render(data: @users[0],
-                            include: 'posts',
+                            include: JSONAPI::IncludeDirective.from_string('posts'),
                             cache: cache)
     expected = {
       data: {

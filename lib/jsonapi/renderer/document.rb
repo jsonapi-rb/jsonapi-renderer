@@ -13,7 +13,7 @@ module JSONAPI
         @links   = params[:links] || {}
         @fields  = _symbolize_fields(params[:fields] || {})
         @jsonapi = params[:jsonapi]
-        @include = JSONAPI::IncludeDirective.new(params[:include] || {})
+        @include = params[:include] || {}
         @relationship = params[:relationship]
         @cache = params[:cache]
       end

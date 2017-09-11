@@ -146,7 +146,7 @@ describe JSONAPI::Renderer, '#render' do
 
   it 'renders included relationships' do
     actual = subject.render(data: @users[0],
-                            include: 'posts')
+                            include: JSONAPI::IncludeDirective.from_string('posts'))
     expected = {
       data: {
         type: 'users',
@@ -360,8 +360,10 @@ describe JSONAPI::Renderer, '#render' do
     end
 
     it 'renders supports include parameter' do
-      actual = subject.render(data: @users[0], relationship: :posts,
-                              include: 'posts.author')
+      actual = subject.render(
+        data: @users[0], relationship: :posts,
+        include: JSONAPI::IncludeDirective.from_string('posts.author')
+      )
       actual_included = actual.delete(:included)
 
       expected = {
