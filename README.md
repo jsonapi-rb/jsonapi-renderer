@@ -87,6 +87,18 @@ JSONAPI.render(data: resources,
 
 This returns a JSON API compliant hash representing the described document.
 
+#### Rendering a relationship
+```ruby
+JSONAPI.render(data: resource,
+               relationship: :posts,
+               include: include_string,
+               fields: fields_hash,
+               meta: meta_hash,
+               links: links_hash)
+```
+
+This returns a JSON API compliant hash representing the described document.
+
 ### Rendering errors
 
 ```ruby
