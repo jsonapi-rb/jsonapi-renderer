@@ -2,7 +2,7 @@ require 'set'
 
 module JSONAPI
   class Renderer
-    # @api private
+    # @private
     class ResourcesProcessor
       def process(resources, include, fields)
         @resources = resources

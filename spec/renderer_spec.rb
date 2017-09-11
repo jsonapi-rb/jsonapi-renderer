@@ -336,4 +336,104 @@ describe JSONAPI::Renderer, '#render' do
 
     expect(actual).to eq(expected)
   end
+
+  context 'when rendering a relationship' do
+    it 'renders the linkage data only' do
+      actual = subject.render(data: @users[0], relationship: :posts)
+      expected = {
+        data: [{ type: 'posts', id: '2' }],
+        links: {
+          self: 'http://api.example.com/users/1/relationships/posts',
+          related: {
+            href: 'http://api.example.com/users/1/posts',
+            meta: {
+              do_not_use: true
+            }
+          }
+        },
+        meta: {
+          deleted_posts: 5
+        }
+      }
+
+      expect(actual).to eq(expected)
+    end
+
+    it 'renders supports include parameter' do
+      actual = subject.render(data: @users[0], relationship: :posts,
+                              include: 'posts.author')
+      actual_included = actual.delete(:included)
+
+      expected = {
+        data: [{ type: 'posts', id: '2' }],
+        links: {
+          self: 'http://api.example.com/users/1/relationships/posts',
+          related: {
+            href: 'http://api.example.com/users/1/posts',
+            meta: {
+              do_not_use: true
+            }
+          }
+        },
+        meta: {
+          deleted_posts: 5
+        }
+      }
+      expected_included = [
+        {
+          type: 'users',
+          id: '1',
+          attributes: {
+            name: 'User 1',
+            address: '123 Example st.'
+          },
+          relationships: {
+            posts: {
+              links: {
+                self: 'http://api.example.com/users/1/relationships/posts',
+                related: {
+                  href: 'http://api.example.com/users/1/posts',
+                  meta: {
+                    do_not_use: true
+                  }
+                }
+              },
+              meta: {
+                deleted_posts: 5
+              }
+            }
+          },
+          links: {
+            self: 'http://api.example.com/users/1'
+          },
+          meta: {
+            user_meta: 'is_meta'
+          }
+        },
+        {
+          type: 'posts',
+          id: '2',
+          attributes: {
+            title: 'Post 2',
+            date: 'today'
+          },
+          relationships: {
+            author: {
+              data: { type: 'users', id: '1' },
+              links: {
+                self: 'http://api.example.com/posts/2/relationships/author',
+                related: 'http://api.example.com/posts/2/author'
+              },
+              meta: {
+                author_active: true
+              }
+            }
+          }
+        }
+      ]
+
+      expect(actual).to eq(expected)
+      expect(actual_included).to match_array(expected_included)
+    end
+  end
 end
