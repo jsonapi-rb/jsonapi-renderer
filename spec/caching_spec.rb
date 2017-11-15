@@ -5,7 +5,7 @@ class Cache
     @cache = {}
   end
 
-  def fetch_multi(keys)
+  def fetch_multi(*keys)
     keys.each_with_object({}) do |k, h|
       @cache[k] = yield(k) unless @cache.key?(k)
       h[k] = @cache[k]
@@ -96,6 +96,6 @@ describe JSONAPI::Renderer, '#render' do
     }
 
     expect(JSON.parse(actual.to_json)).to eq(JSON.parse(expected.to_json))
-    expect(actual[:data]).to be_a(JSONAPI::Renderer::CachedResourcesProcessor::JSONString)
+    expect(actual[:data]).to be_a(Hash)
   end
 end
