@@ -13,7 +13,7 @@ module JSONAPI
           cache_hash = cache_key_map(resources)
           processed_resources = @cache.fetch_multi(*cache_hash.keys) do |key|
             res, include, fields = cache_hash[key]
-            json = res.as_jsonapi(include: include, fields: fields)
+            res.as_jsonapi(include: include, fields: fields)
           end
 
           resources.replace(processed_resources.values)
