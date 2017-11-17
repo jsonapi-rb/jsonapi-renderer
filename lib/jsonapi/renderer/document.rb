@@ -11,7 +11,7 @@ module JSONAPI
         @errors  = params.fetch(:errors,  [])
         @meta    = params[:meta]
         @links   = params[:links] || {}
-        @fields  = _symbolize_fields(params[:fields] || {})
+        @fields  = _canonize_fields(params[:fields] || {})
         @jsonapi = params[:jsonapi]
         @include = JSONAPI::IncludeDirective.new(params[:include] || {})
         @relationship = params[:relationship]
@@ -91,9 +91,9 @@ module JSONAPI
         end
       end
 
-      def _symbolize_fields(fields)
+      def _canonize_fields(fields)
         fields.each_with_object({}) do |(k, v), h|
-          h[k.to_sym] = v.map(&:to_sym)
+          h[k.to_sym] = v.map(&:to_sym).sort!
         end
       end
     end
