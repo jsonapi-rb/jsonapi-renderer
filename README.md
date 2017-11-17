@@ -120,7 +120,7 @@ supporting the `fetch_multi` method.
 When using caching, the serializable resources must implement an
 additional `jsonapi_cache_key` method:
 ```ruby
-  # Returns a cache key for the resource, parametered by the `include` and
+  # Returns a cache key for the resource, parameterized by the `include` and
   #   `fields` options.
   # @param options [Hash]
   #   @option fields [Set<Symbol>, Nil] The requested fields, or nil.
