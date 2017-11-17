@@ -15,6 +15,11 @@ module JSONAPI
       end
 
       def process_resources
+        # NOTE(beauby): This is necessary for cache keys consistency.
+        @include_rels = @include_rels.each_with_object({}) do |(k, v), h|
+          h[k] = v.to_a.sort!
+        end
+
         [@primary, @included].each do |resources|
           cache_hash = cache_key_map(resources)
           processed_resources = @cache.fetch_multi(*cache_hash.keys) do |key|
