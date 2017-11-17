@@ -5,7 +5,7 @@ class Cache
     @cache = {}
   end
 
-  def fetch_multi(keys)
+  def fetch_multi(*keys)
     keys.each_with_object({}) do |k, h|
       @cache[k] = yield(k) unless @cache.key?(k)
       h[k] = @cache[k]
