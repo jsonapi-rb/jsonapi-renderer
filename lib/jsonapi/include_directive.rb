@@ -16,6 +16,8 @@ module JSONAPI
     def initialize(include_args, options = {})
       include_hash = Parser.parse_include_args(include_args)
       @hash = include_hash.each_with_object({}) do |(key, value), hash|
+        raise InvalidKey, key unless valid?(key)
+
         hash[key] = self.class.new(value, options)
       end
       @options = options
@@ -67,6 +69,19 @@ module JSONAPI
       end
 
       string_array.join(',')
+    end
+
+    class InvalidKey < StandardError; end
+
+    private
+
+    def valid?(key)
+      key.match(valid_json_key_name_regex)
+    end
+
+    def valid_json_key_name_regex
+      # https://jsonapi.org/format/#document-member-names
+      /^(?![\s\-_])[\u0080-\u10FFFFA-Za-z0-9*]+(?<![\s\-_])$/
     end
   end
 end
