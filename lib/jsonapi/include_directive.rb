@@ -81,7 +81,7 @@ module JSONAPI
 
     def valid_json_key_name_regex
       # https://jsonapi.org/format/#document-member-names
-      /^(?![\s\-_])[\u0080-\u10FFFFA-Za-z0-9*]+(?<![\s\-_])$/
+      /^(?![\s\-_])[\u0080-\u10FFA-Za-z0-9* _-]+(?<![\s\-_])$/
     end
   end
 end
