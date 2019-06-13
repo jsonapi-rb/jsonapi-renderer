@@ -31,10 +31,17 @@ describe JSONAPI::IncludeDirective, '.initialize' do
     end
   end
 
-  context 'not raises InvalidKey' do
+  context 'does not raise InvalidKey' do
     ["\u0080", "B", "t", "5", "\u0100", "\u10FFFAA"].each do |char|
-      it "when provided characher '#{char}'" do
+      it "when provided character '#{char}'" do
         expect(JSONAPI::IncludeDirective.new(char).key?(char)).to be true
+      end
+    end
+
+    [' ', '_', '-'].each do |char|
+      it "when '#{char}' is not at beginning or end" do
+        key = "valid#{char}valid"
+        expect(JSONAPI::IncludeDirective.new(key).key?(key)).to be true
       end
     end
   end
