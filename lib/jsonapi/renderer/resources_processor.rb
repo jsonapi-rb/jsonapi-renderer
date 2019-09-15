@@ -1,5 +1,3 @@
-require 'set'
-
 module JSONAPI
   class Renderer
     # @private
@@ -18,8 +16,9 @@ module JSONAPI
       private
 
       def traverse_resources
-        @traversed    = Set.new # [type, id, prefix]
-        @include_rels = {} # [type, id => Set]
+        # Use hash instead of set for better performances
+        @traversed    = {} # Hash[type, id, prefix] => true
+        @include_rels = {} # Hash[type, id] => Hash[include_key => true]
         @queue        = []
         @primary      = []
         @included     = []
@@ -30,7 +29,7 @@ module JSONAPI
 
       def initialize_queue
         @resources.each do |res|
-          @traversed.add([res.jsonapi_type, res.jsonapi_id, ''])
+          @traversed[[res.jsonapi_type, res.jsonapi_id, '']] = true
           traverse_resource(res, @include.keys, true)
           enqueue_related_resources(res, '', @include)
         end
@@ -46,28 +45,32 @@ module JSONAPI
 
       def traverse_resource(res, include_keys, primary)
         ri = [res.jsonapi_type, res.jsonapi_id]
+        keys_hash = {}
+        include_keys.each { |k| keys_hash[k] = true }
+
         if @include_rels.include?(ri)
-          @include_rels[ri].merge(include_keys)
+          @include_rels[ri].merge!(keys_hash)
         else
-          @include_rels[ri] = Set.new(include_keys)
+          @include_rels[ri] = keys_hash
           (primary ? @primary : @included) << res
         end
       end
 
       def enqueue_related_resources(res, prefix, include_dir)
         res.jsonapi_related(include_dir.keys).each do |key, data|
+          child_prefix = "#{prefix}.#{key}".freeze
           data.each do |child_res|
             next if child_res.nil?
-            child_prefix = "#{prefix}.#{key}"
             enqueue_resource(child_res, child_prefix, include_dir[key])
           end
         end
       end
 
       def enqueue_resource(res, prefix, include_dir)
-        return unless @traversed.add?([res.jsonapi_type,
-                                       res.jsonapi_id,
-                                       prefix])
+        key = [res.jsonapi_type, res.jsonapi_id, prefix]
+        return if @traversed[key]
+
+        @traversed[key] = true
         @queue << [res, prefix, include_dir]
       end
 

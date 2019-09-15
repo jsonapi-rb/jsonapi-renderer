@@ -8,7 +8,7 @@ module JSONAPI
         [@primary, @included].each do |resources|
           resources.map! do |res|
             ri = [res.jsonapi_type, res.jsonapi_id]
-            include_dir = @include_rels[ri]
+            include_dir = @include_rels[ri].keys
             fields = @fields[res.jsonapi_type.to_sym]
             res.as_jsonapi(include: include_dir, fields: fields)
           end
