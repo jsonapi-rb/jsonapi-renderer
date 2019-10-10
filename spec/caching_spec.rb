@@ -96,6 +96,6 @@ describe JSONAPI::Renderer, '#render' do
     }
 
     expect(JSON.parse(actual.to_json)).to eq(JSON.parse(expected.to_json))
-    expect(actual[:data]).to be_a(JSONAPI::Renderer::CachedResourcesProcessor::JSONString)
+    expect(actual[:data]).to be_a(Hash)
   end
 end
