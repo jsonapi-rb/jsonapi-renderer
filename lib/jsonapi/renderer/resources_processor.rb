@@ -59,7 +59,23 @@ module JSONAPI
       end
 
       def include_duplicate_resource(res)
-        duplicate_index = @included.find_index do |included|
+        duplicate_index = find_included_duplicate_resource(res)
+
+        return unless duplicate_index
+
+        duplicate = @included.delete_at(duplicate_index)
+
+        if duplicate.is_a?(Array)
+          duplicate << res
+        else
+          duplicate = [duplicate, res]
+        end
+
+        @included << duplicate
+      end
+
+      def find_included_duplicate_resource(res)
+        @included.find_index do |included|
           if included.is_a?(Array)
             unless included.empty?
               included.first.jsonapi_type == res.jsonapi_type && included.first.jsonapi_id == res.jsonapi_id
@@ -67,18 +83,6 @@ module JSONAPI
           else
             included.jsonapi_type == res.jsonapi_type && included.jsonapi_id == res.jsonapi_id
           end
-        end
-
-        if duplicate_index
-          duplicate = @included.delete_at(duplicate_index)
-
-          if duplicate.is_a?(Array)
-            duplicate << res
-          else
-            duplicate = [duplicate, res]
-          end
-
-          @included << duplicate
         end
       end
 
